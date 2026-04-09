@@ -33,7 +33,7 @@ export function AppShell() {
               </NavLink>
             ))}
         </nav>
-        <button type="button" className="ghost-button" onClick={logout}>
+        <button type="button" className="ghost-button sidebar-logout" onClick={logout}>
           Выйти
         </button>
       </aside>
