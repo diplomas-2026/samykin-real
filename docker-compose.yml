@@ -30,7 +30,7 @@ services:
       APP_USERS_FILE: users.txt
       GIGACHAT_TOKEN: ${GIGACHAT_TOKEN:-}
     ports:
-      - "8080:8080"
+      - "8081:8080"
     volumes:
       - ./product-api/users.txt:/app/users.txt
 

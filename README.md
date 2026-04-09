@@ -41,6 +41,10 @@ Web URL:
 
 `http://localhost:5173`
 
+В dev frontend использует API по адресу:
+
+`http://localhost:8080/api`
+
 ## Тестовые пользователи
 
 Файл:
