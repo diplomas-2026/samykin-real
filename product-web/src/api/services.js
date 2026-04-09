@@ -19,6 +19,7 @@ export const usersApi = {
 
 export const employeesApi = {
   getAll: () => api.get('/employees').then((response) => response.data),
+  getById: (id) => api.get(`/employees/${id}`).then((response) => response.data),
 };
 
 export const payoutsApi = {

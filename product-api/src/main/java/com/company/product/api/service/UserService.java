@@ -1,11 +1,13 @@
 package com.company.product.api.service;
 
+import com.company.product.api.dto.employee.EmployeeDetailsResponse;
 import com.company.product.api.dto.employee.EmployeeResponse;
 import com.company.product.api.dto.user.UserPhotoUpdateRequest;
 import com.company.product.api.dto.user.UserRequest;
 import com.company.product.api.dto.user.UserResponse;
 import com.company.product.api.entity.UserAccount;
 import com.company.product.api.entity.UserRole;
+import com.company.product.api.repository.PayoutRepository;
 import com.company.product.api.repository.UserAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -19,8 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserAccountRepository userAccountRepository;
+    private final PayoutRepository payoutRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final PayoutMapper payoutMapper;
 
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
@@ -76,6 +80,19 @@ public class UserService {
             .stream()
             .map(userMapper::toEmployeeResponse)
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public EmployeeDetailsResponse getEmployeeDetails(Long id) {
+        UserAccount employee = getEntity(id);
+        if (employee.getRole() != UserRole.EMPLOYEE) {
+            throw new IllegalArgumentException("Карточка доступна только для сотрудников");
+        }
+        var payouts = payoutRepository.findAllDetailedByEmployeeId(id)
+            .stream()
+            .map(payoutMapper::toResponse)
+            .toList();
+        return new EmployeeDetailsResponse(userMapper.toEmployeeResponse(employee), payouts);
     }
 
     @Transactional(readOnly = true)

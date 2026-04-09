@@ -499,6 +499,17 @@ textarea {
   min-width: 220px;
 }
 
+.table-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.table-link:hover,
+.table-link:focus-visible {
+  color: #1338be;
+  text-decoration: none;
+}
+
 .employee-card p,
 .feature-card p {
   color: #4b5a68;

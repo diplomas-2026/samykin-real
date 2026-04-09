@@ -1,11 +1,13 @@
 package com.company.product.api.controller;
 
+import com.company.product.api.dto.employee.EmployeeDetailsResponse;
 import com.company.product.api.dto.employee.EmployeeResponse;
 import com.company.product.api.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,5 +22,11 @@ public class EmployeeController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTANT')")
     public List<EmployeeResponse> getEmployees() {
         return userService.getEmployees();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTANT')")
+    public EmployeeDetailsResponse getEmployee(@PathVariable Long id) {
+        return userService.getEmployeeDetails(id);
     }
 }

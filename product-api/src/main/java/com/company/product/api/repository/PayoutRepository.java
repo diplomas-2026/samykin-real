@@ -30,6 +30,15 @@ public interface PayoutRepository extends JpaRepository<Payout, Long> {
         """)
     List<Payout> findAllDetailedByEmployeeEmail(@Param("email") String email);
 
+    @Query("""
+        select p from Payout p
+        join fetch p.employee e
+        join fetch p.createdBy cb
+        where e.id = :employeeId
+        order by p.createdAt desc
+        """)
+    List<Payout> findAllDetailedByEmployeeId(@Param("employeeId") Long employeeId);
+
     long countByStatus(PayoutStatus status);
 
     List<Payout> findAllByStatusOrderByCreatedAtDesc(PayoutStatus status);

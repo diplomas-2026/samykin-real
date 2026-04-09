@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { DashboardPage } from '../pages/DashboardPage';
+import { EmployeeDetailsPage } from '../pages/EmployeeDetailsPage';
 import { EmployeesPage } from '../pages/EmployeesPage';
 import { LandingPage } from '../pages/LandingPage';
 import { LoginPage } from '../pages/LoginPage';
@@ -61,6 +62,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'ACCOUNTANT']}>
             <EmployeesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'employees/:id',
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'ACCOUNTANT']}>
+            <EmployeeDetailsPage />
           </ProtectedRoute>
         ),
       },
