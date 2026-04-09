@@ -809,6 +809,48 @@ textarea {
   gap: 1rem;
 }
 
+.form-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.form-field__label {
+  color: #1f2e44;
+  font-weight: 700;
+}
+
+.form-hint {
+  color: #5a6978;
+  line-height: 1.5;
+}
+
+.field-required {
+  color: #b04a19;
+  font-weight: 800;
+}
+
+.field-error,
+.field-hint {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.field-error {
+  color: #9f2431;
+}
+
+.field-hint {
+  color: #5a6978;
+}
+
+.form-field input[aria-invalid="true"],
+.form-field select[aria-invalid="true"],
+.password-field input[aria-invalid="true"] {
+  border-color: rgba(159, 36, 49, 0.42);
+  background: rgba(255, 244, 246, 0.9);
+}
+
 .full-width {
   grid-column: 1 / -1;
 }
