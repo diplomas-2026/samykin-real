@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { aiApi, employeesApi, payoutsApi } from '../api/services';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
+import { getApiErrorMessage } from '../utils/api';
 
 export function PayoutFormPage() {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState(null);
   const [usage, setUsage] = useState(null);
+  const [error, setError] = useState('');
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [form, setForm] = useState({
     employeeId: '',
     payoutType: 'Премия',
@@ -19,36 +24,70 @@ export function PayoutFormPage() {
   });
 
   useEffect(() => {
-    Promise.all([employeesApi.getAll(), aiApi.getUsage()]).then(([employeesData, usageData]) => {
-      setEmployees(employeesData);
-      setUsage(usageData);
-    });
+    Promise.all([employeesApi.getAll(), aiApi.getUsage()])
+      .then(([employeesData, usageData]) => {
+        setEmployees(employeesData);
+        setUsage(usageData);
+      })
+      .catch((requestError) => {
+        setError(getApiErrorMessage(requestError, 'Не удалось подготовить форму выплаты'));
+      });
   }, []);
 
-  if (!employees || !usage) return <Loader text="Подготовка формы выплаты..." />;
+  if (!employees || !usage) {
+    if (error) {
+      return (
+        <div className="stack">
+          <PageHeader
+            eyebrow="Новая выплата"
+            title="Оформление денежной выплаты"
+            description="Форма создания выплаты с генерацией комментария через GigaChat."
+          />
+          <ErrorBanner message={error} />
+        </div>
+      );
+    }
+    return <Loader text="Подготовка формы выплаты..." />;
+  }
 
   const generateComment = async () => {
     const employee = employees.find((item) => String(item.id) === String(form.employeeId));
     if (!employee) return;
-    const result = await payoutsApi.generateComment({
-      employeeName: employee.fullName,
-      payoutType: form.payoutType,
-      amount: Number(form.amount),
-      basis: form.basis,
-      existingComment: form.comment,
-    });
-    setForm((current) => ({ ...current, comment: result.comment }));
-    setUsage((current) => ({ ...current, usedTokens: current.usedTokens + result.usedTokens, remainingTokens: result.remainingTokens }));
+    setCommentLoading(true);
+    setError('');
+    try {
+      const result = await payoutsApi.generateComment({
+        employeeName: employee.fullName,
+        payoutType: form.payoutType,
+        amount: Number(form.amount),
+        basis: form.basis,
+        existingComment: form.comment,
+      });
+      setForm((current) => ({ ...current, comment: result.comment }));
+      setUsage((current) => ({ ...current, usedTokens: current.usedTokens + result.usedTokens, remainingTokens: result.remainingTokens }));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Не удалось сгенерировать AI-комментарий'));
+    } finally {
+      setCommentLoading(false);
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await payoutsApi.create({
-      ...form,
-      employeeId: Number(form.employeeId),
-      amount: Number(form.amount),
-    });
-    navigate('/payouts');
+    setSubmitLoading(true);
+    setError('');
+    try {
+      await payoutsApi.create({
+        ...form,
+        employeeId: Number(form.employeeId),
+        amount: Number(form.amount),
+      });
+      navigate('/payouts');
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Не удалось сохранить выплату'));
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   return (
@@ -58,6 +97,7 @@ export function PayoutFormPage() {
         title="Оформление денежной выплаты"
         description="Форма создания выплаты с генерацией комментария через GigaChat."
       />
+      <ErrorBanner message={error} />
       <div className="dashboard-grid">
         <form className="panel form-grid" onSubmit={handleSubmit}>
           <label>Сотрудник
@@ -79,8 +119,12 @@ export function PayoutFormPage() {
             <textarea rows="3" value={form.payoutNote} onChange={(event) => setForm((current) => ({ ...current, payoutNote: event.target.value }))} />
           </label>
           <div className="button-row full-width">
-            <button className="ghost-button" type="button" onClick={generateComment}>Сгенерировать комментарий AI</button>
-            <button className="primary-button" type="submit">Сохранить выплату</button>
+            <button className="ghost-button" type="button" disabled={commentLoading} onClick={generateComment}>
+              {commentLoading ? 'Генерируем...' : 'Сгенерировать комментарий AI'}
+            </button>
+            <button className="primary-button" type="submit" disabled={submitLoading}>
+              {submitLoading ? 'Сохраняем...' : 'Сохранить выплату'}
+            </button>
           </div>
         </form>
         <div className="panel">

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Bar, BarChart } from 'recharts';
 import { aiApi, dashboardApi, reportsApi } from '../api/services';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { MetricCard } from '../components/ui/MetricCard';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Loader } from '../components/ui/Loader';
 import { downloadBlob, formatCurrency, formatDateTime, statusLabels } from '../utils/formatters';
 import { useAuth } from '../hooks/useAuth';
+import { getApiErrorMessage } from '../utils/api';
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -13,32 +15,67 @@ export function DashboardPage() {
   const [usage, setUsage] = useState(null);
   const [settings, setSettings] = useState(null);
   const [form, setForm] = useState({ styleName: '', styleInstruction: '' });
+  const [error, setError] = useState('');
+  const [reportLoading, setReportLoading] = useState('');
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([dashboardApi.get(), aiApi.getUsage(), aiApi.getSettings()]).then(([dashboardData, usageData, settingsData]) => {
-      setDashboard(dashboardData);
-      setUsage(usageData);
-      setSettings(settingsData);
-      setForm({
-        styleName: settingsData.styleName,
-        styleInstruction: settingsData.styleInstruction,
+    Promise.all([dashboardApi.get(), aiApi.getUsage(), aiApi.getSettings()])
+      .then(([dashboardData, usageData, settingsData]) => {
+        setDashboard(dashboardData);
+        setUsage(usageData);
+        setSettings(settingsData);
+        setForm({
+          styleName: settingsData.styleName,
+          styleInstruction: settingsData.styleInstruction,
+        });
+      })
+      .catch((requestError) => {
+        setError(getApiErrorMessage(requestError, 'Не удалось загрузить данные дашборда'));
       });
-    });
   }, []);
 
   if (!dashboard || !usage || !settings) {
+    if (error) {
+      return (
+        <div className="stack">
+          <PageHeader
+            eyebrow="Дашборд"
+            title="Финансовая панель бухгалтера"
+            description="Обзор статусов выплат, сумм и использования AI-функций системы."
+          />
+          <ErrorBanner message={error} />
+        </div>
+      );
+    }
     return <Loader text="Загрузка дашборда..." />;
   }
 
   const saveSettings = async (event) => {
     event.preventDefault();
-    const next = await aiApi.updateSettings(form);
-    setSettings(next);
+    setSettingsLoading(true);
+    setError('');
+    try {
+      const next = await aiApi.updateSettings(form);
+      setSettings(next);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Не удалось сохранить стиль AI'));
+    } finally {
+      setSettingsLoading(false);
+    }
   };
 
   const exportReport = async (type, fileName, params) => {
-    const blob = await reportsApi.download(type, params);
-    downloadBlob(blob, fileName);
+    setReportLoading(type);
+    setError('');
+    try {
+      const blob = await reportsApi.download(type, params);
+      downloadBlob(blob, fileName);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Не удалось сформировать Excel-отчет'));
+    } finally {
+      setReportLoading('');
+    }
   };
 
   return (
@@ -49,15 +86,16 @@ export function DashboardPage() {
         description="Обзор статусов выплат, сумм и использования AI-функций системы."
         actions={(
           <div className="button-row">
-            <button className="ghost-button" type="button" onClick={() => exportReport('employees', 'otchet-po-sotrudnikam.xlsx')}>
-              Excel по сотрудникам
+            <button className="ghost-button" type="button" disabled={reportLoading === 'employees'} onClick={() => exportReport('employees', 'otchet-po-sotrudnikam.xlsx')}>
+              {reportLoading === 'employees' ? 'Формируем Excel...' : 'Excel по сотрудникам'}
             </button>
-            <button className="primary-button" type="button" onClick={() => exportReport('summary', 'svodnyy-otchet.xlsx')}>
-              Сводный Excel
+            <button className="primary-button" type="button" disabled={reportLoading === 'summary'} onClick={() => exportReport('summary', 'svodnyy-otchet.xlsx')}>
+              {reportLoading === 'summary' ? 'Формируем Excel...' : 'Сводный Excel'}
             </button>
           </div>
         )}
       />
+      <ErrorBanner message={error} />
 
       <section className="metrics-grid">
         <MetricCard label="Всего выплат" value={dashboard.totalPayouts} />
@@ -123,7 +161,9 @@ export function DashboardPage() {
                 Инструкция по стилю
                 <textarea rows="4" value={form.styleInstruction} onChange={(event) => setForm((current) => ({ ...current, styleInstruction: event.target.value }))} />
               </label>
-              <button className="primary-button" type="submit">Сохранить стиль</button>
+              <button className="primary-button" type="submit" disabled={settingsLoading}>
+                {settingsLoading ? 'Сохраняем...' : 'Сохранить стиль'}
+              </button>
             </form>
           ) : (
             <div className="ai-settings-summary">

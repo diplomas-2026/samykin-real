@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { PasswordField } from '../components/ui/PasswordField';
 import { useAuth } from '../hooks/useAuth';
+import { getApiErrorMessage } from '../utils/api';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -18,7 +20,7 @@ export function LoginPage() {
       const user = await login(form);
       navigate(user.role === 'EMPLOYEE' ? '/my-payouts' : '/dashboard');
     } catch (requestError) {
-      setError(requestError.response?.data?.details?.[0] || 'Не удалось выполнить вход');
+      setError(getApiErrorMessage(requestError, 'Не удалось выполнить вход'));
     } finally {
       setLoading(false);
     }
@@ -46,7 +48,7 @@ export function LoginPage() {
           onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           placeholder="Введите пароль"
         />
-        {error ? <div className="error-banner">{error}</div> : null}
+        <ErrorBanner message={error} />
         <button className="primary-button" type="submit" disabled={loading}>
           {loading ? 'Выполняется вход...' : 'Войти'}
         </button>
