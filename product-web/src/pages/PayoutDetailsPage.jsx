@@ -5,7 +5,12 @@ import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
 import { formatCurrency, formatDate, formatDateTime, statusLabels } from '../utils/formatters';
 
-const transitions = ['PREPARED', 'PAID', 'CANCELLED'];
+const availableTransitionsByStatus = {
+  CREATED: ['PREPARED', 'CANCELLED'],
+  PREPARED: ['PAID', 'CANCELLED'],
+  PAID: [],
+  CANCELLED: [],
+};
 const statusActionLabels = {
   PREPARED: 'Подготовить к выдаче',
   PAID: 'Подтвердить выдачу',
@@ -27,7 +32,7 @@ export function PayoutDetailsPage() {
 
   if (!payout) return <Loader text="Загрузка карточки выплаты..." />;
 
-  const availableTransitions = transitions.filter((status) => status !== payout.status);
+  const availableTransitions = availableTransitionsByStatus[payout.status] ?? [];
 
   const updateStatus = async (status) => {
     if (status === payout.status) {
@@ -71,21 +76,27 @@ export function PayoutDetailsPage() {
             <div className="status-actions-header">
               <strong>Изменение статуса выплаты</strong>
               <p>Текущий статус: <span className="status-chip">{statusLabels[payout.status]}</span></p>
-              <p>Выберите следующее действие, которое нужно выполнить по этой выплате.</p>
+              <p>Система показывает только те действия, которые допустимы для текущего этапа обработки выплаты.</p>
             </div>
-            <div className="status-actions-grid">
-              {availableTransitions.map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  className="status-action-card"
-                  onClick={() => updateStatus(status)}
-                >
-                  <span className="status-action-card__label">{statusActionLabels[status]}</span>
-                  <span className="status-action-card__description">{statusActionDescriptions[status]}</span>
-                </button>
-              ))}
-            </div>
+            {availableTransitions.length > 0 ? (
+              <div className="status-actions-grid">
+                {availableTransitions.map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    className="status-action-card"
+                    onClick={() => updateStatus(status)}
+                  >
+                    <span className="status-action-card__label">{statusActionLabels[status]}</span>
+                    <span className="status-action-card__description">{statusActionDescriptions[status]}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="status-actions-empty">
+                Для выплаты в статусе «{statusLabels[payout.status]}» дальнейшие изменения статуса недоступны.
+              </div>
+            )}
           </section>
         </div>
       </div>

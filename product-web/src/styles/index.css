@@ -573,6 +573,15 @@ textarea {
   line-height: 1.5;
 }
 
+.status-actions-empty {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(19, 34, 56, 0.04);
+  border: 1px solid rgba(19, 34, 56, 0.06);
+  color: #5a6978;
+  line-height: 1.6;
+}
+
 .ai-feedback {
   display: grid;
   gap: 0.55rem;
