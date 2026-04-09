@@ -5,6 +5,7 @@ import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
 import { getApiErrorMessage } from '../utils/api';
+import { formatDateTime } from '../utils/formatters';
 
 export function PayoutFormPage() {
   const navigate = useNavigate();
@@ -143,7 +144,7 @@ export function PayoutFormPage() {
           <div className="usage-list">
             <div><span>Потрачено</span><strong>{usage.usedTokens}</strong></div>
             <div><span>Осталось</span><strong>{usage.remainingTokens}</strong></div>
-            <div><span>Сброс</span><strong>{usage.resetsAt}</strong></div>
+            <div><span>Сброс</span><strong>{formatDateTime(usage.resetsAt)}</strong></div>
           </div>
         </div>
       </div>
