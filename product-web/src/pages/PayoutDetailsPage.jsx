@@ -7,9 +7,14 @@ import { formatCurrency, formatDate, formatDateTime, statusLabels } from '../uti
 
 const transitions = ['PREPARED', 'PAID', 'CANCELLED'];
 const statusActionLabels = {
-  PREPARED: 'Подготовлена',
-  PAID: 'Выдана',
-  CANCELLED: 'Отменена',
+  PREPARED: 'Подготовить к выдаче',
+  PAID: 'Подтвердить выдачу',
+  CANCELLED: 'Отменить выплату',
+};
+const statusActionDescriptions = {
+  PREPARED: 'Выплата будет отмечена как готовая к фактической выдаче.',
+  PAID: 'Система зафиксирует, что денежные средства уже выданы сотруднику.',
+  CANCELLED: 'Выплата будет снята с работы и исключена из дальнейшей обработки.',
 };
 
 export function PayoutDetailsPage() {
@@ -21,6 +26,8 @@ export function PayoutDetailsPage() {
   }, [id]);
 
   if (!payout) return <Loader text="Загрузка карточки выплаты..." />;
+
+  const availableTransitions = transitions.filter((status) => status !== payout.status);
 
   const updateStatus = async (status) => {
     if (status === payout.status) {
@@ -60,23 +67,26 @@ export function PayoutDetailsPage() {
           <div><strong>Основание</strong><p>{payout.basis}</p></div>
           <div><strong>Комментарий</strong><p>{payout.comment}</p></div>
           <div><strong>Примечание</strong><p>{payout.payoutNote || '—'}</p></div>
-          <div className="status-actions-header">
-            <strong>Изменение статуса выплаты</strong>
-            <p>Используйте кнопки ниже, чтобы перевести выплату в следующий рабочий статус.</p>
-          </div>
-          <div className="button-row">
-            {transitions.map((status) => (
-              <button
-                key={status}
-                type="button"
-                className="ghost-button"
-                disabled={status === payout.status}
-                onClick={() => updateStatus(status)}
-              >
-                Отметить как {statusActionLabels[status]}
-              </button>
-            ))}
-          </div>
+          <section className="status-actions-panel">
+            <div className="status-actions-header">
+              <strong>Изменение статуса выплаты</strong>
+              <p>Текущий статус: <span className="status-chip">{statusLabels[payout.status]}</span></p>
+              <p>Выберите следующее действие, которое нужно выполнить по этой выплате.</p>
+            </div>
+            <div className="status-actions-grid">
+              {availableTransitions.map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  className="status-action-card"
+                  onClick={() => updateStatus(status)}
+                >
+                  <span className="status-action-card__label">{statusActionLabels[status]}</span>
+                  <span className="status-action-card__description">{statusActionDescriptions[status]}</span>
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>

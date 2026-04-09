@@ -531,6 +531,48 @@ textarea {
   line-height: 1.55;
 }
 
+.status-actions-panel {
+  display: grid;
+  gap: 1rem;
+  padding-top: 0.35rem;
+}
+
+.status-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.status-action-card {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(19, 34, 56, 0.08);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 247, 251, 0.96) 100%);
+  text-align: left;
+  color: #1f2e44;
+  box-shadow: 0 10px 24px rgba(19, 34, 56, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.status-action-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(19, 56, 190, 0.18);
+  box-shadow: 0 14px 30px rgba(19, 34, 56, 0.1);
+}
+
+.status-action-card__label {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.status-action-card__description {
+  color: #5a6978;
+  line-height: 1.5;
+}
+
 .ai-feedback {
   display: grid;
   gap: 0.55rem;
