@@ -516,6 +516,21 @@ textarea {
   word-break: break-word;
 }
 
+.status-actions-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.status-actions-header strong,
+.status-actions-header p {
+  margin: 0;
+}
+
+.status-actions-header p {
+  color: #5a6978;
+  line-height: 1.55;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

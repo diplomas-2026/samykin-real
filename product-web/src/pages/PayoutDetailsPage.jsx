@@ -6,6 +6,11 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { formatCurrency, formatDate, formatDateTime, statusLabels } from '../utils/formatters';
 
 const transitions = ['PREPARED', 'PAID', 'CANCELLED'];
+const statusActionLabels = {
+  PREPARED: 'Подготовлена',
+  PAID: 'Выдана',
+  CANCELLED: 'Отменена',
+};
 
 export function PayoutDetailsPage() {
   const { id } = useParams();
@@ -18,6 +23,17 @@ export function PayoutDetailsPage() {
   if (!payout) return <Loader text="Загрузка карточки выплаты..." />;
 
   const updateStatus = async (status) => {
+    if (status === payout.status) {
+      return;
+    }
+
+    const isConfirmed = window.confirm(
+      `Подтвердите изменение статуса выплаты ${payout.payoutCode} на «${statusLabels[status]}».`,
+    );
+    if (!isConfirmed) {
+      return;
+    }
+
     const updated = await payoutsApi.updateStatus(id, status);
     setPayout(updated);
   };
@@ -44,10 +60,20 @@ export function PayoutDetailsPage() {
           <div><strong>Основание</strong><p>{payout.basis}</p></div>
           <div><strong>Комментарий</strong><p>{payout.comment}</p></div>
           <div><strong>Примечание</strong><p>{payout.payoutNote || '—'}</p></div>
+          <div className="status-actions-header">
+            <strong>Изменение статуса выплаты</strong>
+            <p>Используйте кнопки ниже, чтобы перевести выплату в следующий рабочий статус.</p>
+          </div>
           <div className="button-row">
             {transitions.map((status) => (
-              <button key={status} type="button" className="ghost-button" onClick={() => updateStatus(status)}>
-                {statusLabels[status]}
+              <button
+                key={status}
+                type="button"
+                className="ghost-button"
+                disabled={status === payout.status}
+                onClick={() => updateStatus(status)}
+              >
+                Отметить как {statusActionLabels[status]}
               </button>
             ))}
           </div>
