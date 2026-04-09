@@ -7,6 +7,7 @@ import com.company.product.api.repository.PayoutRepository;
 import com.company.product.api.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
@@ -72,6 +73,7 @@ public class AiAssistantService {
               "payoutCodes": ["PAY-00001", "PAY-00002"]
             }
             В message можно использовать markdown.
+            Но верни JSON корректно: если нужен перенос строки внутри message, используй \\n, а не сырой перевод строки.
             В payoutCodes укажи только те коды выплат, которые реально относятся к ответу.
             Если релевантных выплат нет, верни пустой массив.
             """;
@@ -162,13 +164,25 @@ public class AiAssistantService {
             if (!StringUtils.hasText(content)) {
                 throw new IllegalStateException("GigaChat вернул пустой ответ");
             }
-            JsonNode parsed = objectMapper.readTree(normalizeJsonContent(content));
+            JsonNode parsed = parseAssistantResponse(content);
             if (!StringUtils.hasText(parsed.path("message").asText())) {
                 throw new IllegalStateException("GigaChat вернул пустой message");
             }
             return parsed;
         } catch (Exception exception) {
             throw new IllegalStateException("Не удалось получить ответ от GigaChat: " + exception.getMessage(), exception);
+        }
+    }
+
+    private JsonNode parseAssistantResponse(String content) throws Exception {
+        String normalized = escapeRawControlCharsInsideStrings(normalizeJsonContent(content));
+        try {
+            return objectMapper.readTree(normalized);
+        } catch (Exception ignored) {
+            ObjectNode fallback = JsonNodeFactory.instance.objectNode();
+            fallback.put("message", content.trim());
+            fallback.set("payoutCodes", JsonNodeFactory.instance.arrayNode());
+            return fallback;
         }
     }
 
@@ -181,6 +195,53 @@ public class AiAssistantService {
                 .replaceFirst("\\s*```$", "");
         }
         return normalized.trim();
+    }
+
+    private String escapeRawControlCharsInsideStrings(String input) {
+        StringBuilder result = new StringBuilder(input.length() + 32);
+        boolean inString = false;
+        boolean escaped = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char current = input.charAt(i);
+
+            if (escaped) {
+                result.append(current);
+                escaped = false;
+                continue;
+            }
+
+            if (current == '\\') {
+                result.append(current);
+                escaped = true;
+                continue;
+            }
+
+            if (current == '"') {
+                result.append(current);
+                inString = !inString;
+                continue;
+            }
+
+            if (inString) {
+                if (current == '\n') {
+                    result.append("\\n");
+                    continue;
+                }
+                if (current == '\r') {
+                    result.append("\\r");
+                    continue;
+                }
+                if (current == '\t') {
+                    result.append("\\t");
+                    continue;
+                }
+            }
+
+            result.append(current);
+        }
+
+        return result.toString();
     }
 
     private List<String> extractPayoutCodes(JsonNode payoutCodesNode) {
