@@ -1,0 +1,5 @@
+email=admin@samykin.local; password=Admin123!; role=ADMIN
+email=buhgalter@samykin.local; password=Account123!; role=ACCOUNTANT
+email=ivanov@samykin.local; password=Employee123!; role=EMPLOYEE
+email=petrova@samykin.local; password=Employee123!; role=EMPLOYEE
+email=sidorov@samykin.local; password=Employee123!; role=EMPLOYEE
