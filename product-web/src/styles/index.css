@@ -543,6 +543,85 @@ textarea {
   line-height: 1.5;
 }
 
+.assistant-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.assistant-messages {
+  display: grid;
+  gap: 0.9rem;
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.assistant-message {
+  display: grid;
+  gap: 0.35rem;
+  max-width: min(680px, 100%);
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(19, 34, 56, 0.05);
+  border: 1px solid rgba(19, 34, 56, 0.06);
+}
+
+.assistant-message--user {
+  margin-left: auto;
+  background: linear-gradient(135deg, rgba(19, 56, 190, 0.92) 0%, rgba(53, 88, 216, 0.9) 100%);
+  color: #ffffff;
+}
+
+.assistant-message--assistant {
+  margin-right: auto;
+  background: rgba(246, 248, 252, 0.95);
+}
+
+.assistant-message__role,
+.assistant-message p {
+  margin: 0;
+}
+
+.assistant-message__role {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.assistant-message--assistant .assistant-message__role {
+  color: #7b5a1a;
+}
+
+.assistant-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.assistant-quick-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.assistant-quick-button {
+  width: 100%;
+  border: 1px solid rgba(19, 34, 56, 0.08);
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background: rgba(255, 255, 255, 0.86);
+  color: #1f2e44;
+  text-align: left;
+  cursor: pointer;
+  transition: 180ms ease;
+}
+
+.assistant-quick-button:hover,
+.assistant-quick-button:focus-visible {
+  border-color: rgba(19, 56, 190, 0.18);
+  background: rgba(242, 246, 255, 0.96);
+  outline: none;
+}
+
 .payout-card {
   gap: 0.9rem;
 }

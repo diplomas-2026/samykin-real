@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { AssistantPage } from '../pages/AssistantPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { EmployeeDetailsPage } from '../pages/EmployeeDetailsPage';
 import { EmployeesPage } from '../pages/EmployeesPage';
@@ -102,6 +103,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['EMPLOYEE']}>
             <MyPayoutsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'assistant',
+        element: (
+          <ProtectedRoute roles={['EMPLOYEE']}>
+            <AssistantPage />
           </ProtectedRoute>
         ),
       },

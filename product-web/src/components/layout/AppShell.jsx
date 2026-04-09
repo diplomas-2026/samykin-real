@@ -12,6 +12,7 @@ export function AppShell() {
     { to: '/employees', label: 'Сотрудники', roles: ['ADMIN', 'ACCOUNTANT'] },
     { to: '/payouts', label: 'Выплаты', roles: ['ADMIN', 'ACCOUNTANT'] },
     { to: '/my-payouts', label: 'Мои выплаты', roles: ['EMPLOYEE'] },
+    { to: '/assistant', label: 'AI-помощник', roles: ['EMPLOYEE'] },
     { to: '/profile', label: 'Профиль', roles: ['ADMIN', 'ACCOUNTANT', 'EMPLOYEE'] },
   ];
 

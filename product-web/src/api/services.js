@@ -36,6 +36,7 @@ export const aiApi = {
   getUsage: () => api.get('/ai/usage').then((response) => response.data),
   getSettings: () => api.get('/ai/settings').then((response) => response.data),
   updateSettings: (payload) => api.put('/ai/settings', payload).then((response) => response.data),
+  chat: (payload) => api.post('/ai/assistant/chat', payload).then((response) => response.data),
 };
 
 export const reportsApi = {
