@@ -1,6 +1,7 @@
 package com.company.product.api.controller;
 
 import com.company.product.api.dto.user.UserRequest;
+import com.company.product.api.dto.user.UserPhotoUpdateRequest;
 import com.company.product.api.dto.user.UserResponse;
 import com.company.product.api.service.UserService;
 import jakarta.validation.Valid;
@@ -45,5 +46,11 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse update(@PathVariable Long id, @Valid @RequestBody UserRequest request) {
         return userService.updateUser(id, request);
+    }
+
+    @PutMapping("/me/photo")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public UserResponse updateOwnPhoto(@Valid @RequestBody UserPhotoUpdateRequest request, Authentication authentication) {
+        return userService.updateOwnPhoto(authentication.getName(), request);
     }
 }

@@ -14,6 +14,7 @@ export const usersApi = {
   getById: (id) => api.get(`/users/${id}`).then((response) => response.data),
   create: (payload) => api.post('/users', payload).then((response) => response.data),
   update: (id, payload) => api.put(`/users/${id}`, payload).then((response) => response.data),
+  updateOwnPhoto: (payload) => api.put('/users/me/photo', payload).then((response) => response.data),
 };
 
 export const employeesApi = {

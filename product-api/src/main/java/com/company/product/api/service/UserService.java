@@ -1,6 +1,7 @@
 package com.company.product.api.service;
 
 import com.company.product.api.dto.employee.EmployeeResponse;
+import com.company.product.api.dto.user.UserPhotoUpdateRequest;
 import com.company.product.api.dto.user.UserRequest;
 import com.company.product.api.dto.user.UserResponse;
 import com.company.product.api.entity.UserAccount;
@@ -81,6 +82,20 @@ public class UserService {
     public UserAccount findByEmail(String email) {
         return userAccountRepository.findByEmailIgnoreCase(email)
             .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+    }
+
+    @Transactional
+    public UserResponse updateOwnPhoto(String email, UserPhotoUpdateRequest request) {
+        UserAccount user = findByEmail(email);
+        if (user.getRole() != UserRole.EMPLOYEE) {
+            throw new IllegalArgumentException("Фотографию профиля может изменить только сотрудник");
+        }
+        String photoUrl = request.photoUrl().trim();
+        if (!photoUrl.startsWith("data:image/")) {
+            throw new IllegalArgumentException("Поддерживаются только изображения");
+        }
+        user.setPhotoUrl(photoUrl);
+        return userMapper.toUserResponse(userAccountRepository.save(user));
     }
 
     @Transactional(readOnly = true)

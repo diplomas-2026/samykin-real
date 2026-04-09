@@ -16,6 +16,7 @@ public class UserMapper {
             user.getDepartment(),
             user.getPosition(),
             user.getEmployeeCode(),
+            user.getPhotoUrl(),
             user.getRole(),
             user.isActive(),
             user.getCreatedAt()
@@ -29,7 +30,8 @@ public class UserMapper {
             user.getEmail(),
             user.getDepartment(),
             user.getPosition(),
-            user.getEmployeeCode()
+            user.getEmployeeCode(),
+            user.getPhotoUrl()
         );
     }
 }

@@ -10,6 +10,7 @@ public record UserResponse(
     String department,
     String position,
     String employeeCode,
+    String photoUrl,
     UserRole role,
     boolean active,
     OffsetDateTime createdAt

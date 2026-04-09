@@ -42,6 +42,9 @@ public class UserAccount {
     @Column(nullable = false, length = 40, unique = true)
     private String employeeCode;
 
+    @Column(columnDefinition = "text")
+    private String photoUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private UserRole role;

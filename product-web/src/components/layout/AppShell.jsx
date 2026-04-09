@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { UserAvatar } from '../ui/UserAvatar';
 import { roleLabels } from '../../utils/formatters';
 
 export function AppShell() {
@@ -21,6 +22,7 @@ export function AppShell() {
           Samykin Pay
         </Link>
         <div className="sidebar-user">
+          <UserAvatar user={user} size="sm" />
           <strong>{user.fullName}</strong>
           <span>{roleLabels[user.role]}</span>
         </div>

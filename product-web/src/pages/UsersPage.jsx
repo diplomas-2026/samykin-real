@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { usersApi } from '../api/services';
 import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
+import { UserAvatar } from '../components/ui/UserAvatar';
 import { formatDateTime, roleLabels } from '../utils/formatters';
 
 export function UsersPage() {
@@ -37,7 +38,12 @@ export function UsersPage() {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.fullName}</td>
+                <td>
+                  <div className="table-user-cell">
+                    <UserAvatar user={user} size="xs" />
+                    <span>{user.fullName}</span>
+                  </div>
+                </td>
                 <td>{user.email}</td>
                 <td>{roleLabels[user.role]}</td>
                 <td>{user.department}</td>

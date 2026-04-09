@@ -18,6 +18,7 @@ public record SeedDataModels(
         String department,
         String position,
         String employeeCode,
+        String photoUrl,
         UserRole role,
         boolean active
     ) {

@@ -57,6 +57,7 @@ public class SeedDataService implements CommandLineRunner {
             user.setDepartment(seeded.department());
             user.setPosition(seeded.position());
             user.setEmployeeCode(seeded.employeeCode());
+            user.setPhotoUrl(seeded.photoUrl());
             user.setRole(seeded.role());
             user.setActive(seeded.active());
             userAccountRepository.save(user);
