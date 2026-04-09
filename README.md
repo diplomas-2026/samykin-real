@@ -61,3 +61,12 @@ npx playwright test
 Скриншоты сохраняются в:
 
 `product-web/artifacts/screenshots/`
+
+## CI/CD
+
+Для ветки `main` настроен GitHub Actions workflow:
+
+- backend тестируется через Gradle
+- frontend собирается через Vite
+- после этого выполняется деплой на VPS по SSH
+- на сервере обновляются API и статический web

@@ -1,0 +1,94 @@
+name: Deploy Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: samykin-real-main-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run backend tests
+        working-directory: product-api
+        run: ./gradlew test --no-daemon
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: product-web/package-lock.json
+
+      - name: Build frontend
+        working-directory: product-web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare SSH access
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Pack frontend bundle
+        run: tar -C product-web/dist -czf /tmp/samykin-real-web.tar.gz .
+
+      - name: Upload frontend bundle to VPS
+        run: |
+          scp -P "${{ secrets.VPS_PORT }}" \
+            -i ~/.ssh/id_ed25519 \
+            /tmp/samykin-real-web.tar.gz \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/samykin-real-web.tar.gz"
+
+      - name: Deploy on VPS
+        shell: bash
+        run: |
+          ssh -p "${{ secrets.VPS_PORT }}" -i ~/.ssh/id_ed25519 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -s' <<EOF
+          set -e
+
+          cat > "${{ secrets.VPS_DEPLOY_PATH }}/.env" <<EOV
+          GIGACHAT_TOKEN=${{ secrets.GIGACHAT_TOKEN }}
+          EOV
+          chmod 600 "${{ secrets.VPS_DEPLOY_PATH }}/.env"
+
+          cd "${{ secrets.VPS_DEPLOY_PATH }}"
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+
+          docker compose up -d --build
+
+          mkdir -p "${{ secrets.VPS_WEB_ROOT }}"
+          tar -xzf /tmp/samykin-real-web.tar.gz -C "${{ secrets.VPS_WEB_ROOT }}"
+
+          nginx -t
+          systemctl reload nginx
+
+          for attempt in \$(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8081/actuator/health >/dev/null; then
+              break
+            fi
+            sleep 3
+          done
+
+          curl -fsS http://127.0.0.1:8081/actuator/health
+          EOF
