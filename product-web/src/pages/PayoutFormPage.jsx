@@ -11,6 +11,7 @@ export function PayoutFormPage() {
   const [employees, setEmployees] = useState(null);
   const [usage, setUsage] = useState(null);
   const [error, setError] = useState('');
+  const [aiError, setAiError] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [form, setForm] = useState({
@@ -50,11 +51,13 @@ export function PayoutFormPage() {
     return <Loader text="Подготовка формы выплаты..." />;
   }
 
+  const canGenerateAiComment = Boolean(form.employeeId && form.basis.trim() && Number(form.amount) > 0);
+
   const generateComment = async () => {
     const employee = employees.find((item) => String(item.id) === String(form.employeeId));
     if (!employee) return;
     setCommentLoading(true);
-    setError('');
+    setAiError('');
     try {
       const result = await payoutsApi.generateComment({
         employeeName: employee.fullName,
@@ -66,7 +69,7 @@ export function PayoutFormPage() {
       setForm((current) => ({ ...current, comment: result.comment }));
       setUsage((current) => ({ ...current, usedTokens: current.usedTokens + result.usedTokens, remainingTokens: result.remainingTokens }));
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError, 'Не удалось сгенерировать AI-комментарий'));
+      setAiError(getApiErrorMessage(requestError, 'Не удалось сгенерировать AI-комментарий'));
     } finally {
       setCommentLoading(false);
     }
@@ -76,6 +79,7 @@ export function PayoutFormPage() {
     event.preventDefault();
     setSubmitLoading(true);
     setError('');
+    setAiError('');
     try {
       await payoutsApi.create({
         ...form,
@@ -115,11 +119,18 @@ export function PayoutFormPage() {
           <label className="full-width">Комментарий
             <textarea rows="4" value={form.comment} onChange={(event) => setForm((current) => ({ ...current, comment: event.target.value }))} />
           </label>
+          <div className="full-width ai-feedback">
+            <div className="ai-feedback__hint">
+              AI-генерация доступна после выбора сотрудника, ввода суммы и основания выплаты.
+            </div>
+            {commentLoading ? <div className="ai-feedback__status">AI подбирает формулировку комментария...</div> : null}
+            <ErrorBanner message={aiError} />
+          </div>
           <label className="full-width">Примечание
             <textarea rows="3" value={form.payoutNote} onChange={(event) => setForm((current) => ({ ...current, payoutNote: event.target.value }))} />
           </label>
           <div className="button-row full-width">
-            <button className="ghost-button" type="button" disabled={commentLoading} onClick={generateComment}>
+            <button className="ghost-button" type="button" disabled={commentLoading || !canGenerateAiComment} onClick={generateComment}>
               {commentLoading ? 'Генерируем...' : 'Сгенерировать комментарий AI'}
             </button>
             <button className="primary-button" type="submit" disabled={submitLoading}>

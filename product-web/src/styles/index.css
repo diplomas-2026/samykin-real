@@ -531,6 +531,23 @@ textarea {
   line-height: 1.55;
 }
 
+.ai-feedback {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ai-feedback__hint,
+.ai-feedback__status {
+  margin: 0;
+  color: #5a6978;
+  line-height: 1.5;
+}
+
+.ai-feedback__status {
+  color: #284c8f;
+  font-weight: 700;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
