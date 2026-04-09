@@ -335,6 +335,45 @@ textarea {
   max-width: 62ch;
 }
 
+.filters-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.8fr) repeat(2, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.35rem;
+  color: #4d5c6c;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.filter-field input,
+.filter-field select {
+  margin-top: 0;
+}
+
+.empty-state {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 0.4rem;
+  border-radius: 20px;
+  background: rgba(19, 34, 56, 0.04);
+  border: 1px solid rgba(19, 34, 56, 0.06);
+}
+
+.empty-state strong,
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state p {
+  color: #5a6978;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -533,5 +572,9 @@ textarea {
   .card-topline {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filters-bar {
+    grid-template-columns: 1fr;
   }
 }
