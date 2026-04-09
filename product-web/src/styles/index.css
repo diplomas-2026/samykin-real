@@ -44,6 +44,31 @@ textarea {
   resize: vertical;
 }
 
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  padding-right: 7.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.55rem;
+  top: calc(50% + 0.2rem);
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(19, 34, 56, 0.08);
+  color: #132238;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .landing,
 .auth-page {
   min-height: 100vh;

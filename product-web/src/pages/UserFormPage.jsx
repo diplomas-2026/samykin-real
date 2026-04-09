@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usersApi } from '../api/services';
 import { PageHeader } from '../components/ui/PageHeader';
+import { PasswordField } from '../components/ui/PasswordField';
 
 const emptyForm = {
   email: '',
@@ -54,7 +55,13 @@ export function UserFormPage() {
             <option value="EMPLOYEE">Сотрудник</option>
           </select>
         </label>
-        <label>Пароль<input type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} /></label>
+        <PasswordField
+          label="Пароль"
+          name="password"
+          value={form.password}
+          onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+          placeholder="Введите пароль"
+        />
         <label className="checkbox-row">
           <input type="checkbox" checked={form.active} onChange={(event) => setForm((current) => ({ ...current, active: event.target.checked }))} />
           Учетная запись активна

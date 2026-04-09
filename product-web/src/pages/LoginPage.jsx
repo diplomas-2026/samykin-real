@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PasswordField } from '../components/ui/PasswordField';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
@@ -38,15 +39,13 @@ export function LoginPage() {
             placeholder="ivanov@samykin.local"
           />
         </label>
-        <label>
-          Пароль
-          <input
-            type="password"
-            value={form.password}
-            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder="Введите пароль"
-          />
-        </label>
+        <PasswordField
+          label="Пароль"
+          name="password"
+          value={form.password}
+          onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+          placeholder="Введите пароль"
+        />
         {error ? <div className="error-banner">{error}</div> : null}
         <button className="primary-button" type="submit" disabled={loading}>
           {loading ? 'Выполняется вход...' : 'Войти'}
