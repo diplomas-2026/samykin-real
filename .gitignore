@@ -5,6 +5,8 @@ product-web/node_modules
 product-web/dist
 product-web/test-results
 product-web/playwright-report
-product-web/artifacts
+product-web/artifacts/*
+!product-web/artifacts/screenshots/
+!product-web/artifacts/screenshots/**
 product-api/.gradle
 product-api/build

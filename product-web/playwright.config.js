@@ -4,8 +4,12 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
     screenshot: 'off',
+    viewport: {
+      width: 1440,
+      height: 1080,
+    },
   },
   reporter: [['list']],
 });
