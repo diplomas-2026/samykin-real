@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+.vscode
+product-web/node_modules
+product-web/dist
+product-web/test-results
+product-web/playwright-report
+product-web/artifacts
+product-api/.gradle
+product-api/build
+product-api/users.txt

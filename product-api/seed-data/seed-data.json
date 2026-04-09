@@ -1,0 +1,92 @@
+{
+  "users": [
+    {
+      "email": "admin@samykin.local",
+      "password": "Admin123!",
+      "fullName": "Администратор Самыкин",
+      "department": "Администрирование",
+      "position": "Системный администратор",
+      "employeeCode": "ADM-001",
+      "role": "ADMIN",
+      "active": true
+    },
+    {
+      "email": "buhgalter@samykin.local",
+      "password": "Account123!",
+      "fullName": "Елена Громова",
+      "department": "Бухгалтерия",
+      "position": "Бухгалтер",
+      "employeeCode": "ACC-001",
+      "role": "ACCOUNTANT",
+      "active": true
+    },
+    {
+      "email": "ivanov@samykin.local",
+      "password": "Employee123!",
+      "fullName": "Иван Иванов",
+      "department": "Логистика",
+      "position": "Сотрудник склада",
+      "employeeCode": "EMP-001",
+      "role": "EMPLOYEE",
+      "active": true
+    },
+    {
+      "email": "petrova@samykin.local",
+      "password": "Employee123!",
+      "fullName": "Мария Петрова",
+      "department": "Продажи",
+      "position": "Менеджер",
+      "employeeCode": "EMP-002",
+      "role": "EMPLOYEE",
+      "active": true
+    },
+    {
+      "email": "sidorov@samykin.local",
+      "password": "Employee123!",
+      "fullName": "Алексей Сидоров",
+      "department": "Производство",
+      "position": "Оператор",
+      "employeeCode": "EMP-003",
+      "role": "EMPLOYEE",
+      "active": true
+    }
+  ],
+  "payouts": [
+    {
+      "payoutCode": "PAY-00001",
+      "employeeEmail": "ivanov@samykin.local",
+      "createdByEmail": "buhgalter@samykin.local",
+      "payoutType": "Премия",
+      "amount": 12000.00,
+      "payoutDate": "2026-04-03",
+      "status": "PAID",
+      "basis": "Выполнение плана за март",
+      "comment": "Денежная выплата оформлена в виде премии за выполнение плана по итогам отчетного периода.",
+      "payoutNote": "Получено сотрудником лично"
+    },
+    {
+      "payoutCode": "PAY-00002",
+      "employeeEmail": "petrova@samykin.local",
+      "createdByEmail": "buhgalter@samykin.local",
+      "payoutType": "Компенсация",
+      "amount": 5800.00,
+      "payoutDate": "2026-04-10",
+      "status": "PREPARED",
+      "basis": "Компенсация командировочных расходов",
+      "comment": "Подготовлена компенсационная выплата по подтвержденным расходам сотрудника.",
+      "payoutNote": "Ожидает выдачи"
+    },
+    {
+      "payoutCode": "PAY-00003",
+      "employeeEmail": "sidorov@samykin.local",
+      "createdByEmail": "buhgalter@samykin.local",
+      "payoutType": "Материальная помощь",
+      "amount": 15000.00,
+      "payoutDate": "2026-04-12",
+      "status": "CREATED",
+      "basis": "Материальная помощь по заявлению сотрудника",
+      "comment": "Выплата создана и ожидает подготовки к выдаче.",
+      "payoutNote": ""
+    }
+  ]
+}
