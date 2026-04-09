@@ -107,10 +107,14 @@ export function DashboardPage() {
         </div>
 
         <div className="panel">
-          <h3>Стиль AI-комментариев</h3>
-          <p>Системный prompt скрыт. Администратор может менять только стиль общения модели.</p>
+          <div className="panel-heading">
+            <div>
+              <h3>Стиль AI-комментариев</h3>
+              <p>Системный prompt скрыт. Администратор может менять только тон, формулировки и деловой стиль ответа модели.</p>
+            </div>
+          </div>
           {user.role === 'ADMIN' ? (
-            <form className="stack-sm" onSubmit={saveSettings}>
+            <form className="stack-sm ai-settings-form" onSubmit={saveSettings}>
               <label>
                 Название стиля
                 <input value={form.styleName} onChange={(event) => setForm((current) => ({ ...current, styleName: event.target.value }))} />
@@ -122,9 +126,15 @@ export function DashboardPage() {
               <button className="primary-button" type="submit">Сохранить стиль</button>
             </form>
           ) : (
-            <div className="usage-list">
-              <div><span>Текущий стиль</span><strong>{settings.styleName}</strong></div>
-              <div><span>Инструкция</span><strong>{settings.styleInstruction}</strong></div>
+            <div className="ai-settings-summary">
+              <div className="summary-card">
+                <span>Текущий стиль</span>
+                <strong>{settings.styleName}</strong>
+              </div>
+              <div className="summary-card summary-card--wide">
+                <span>Инструкция</span>
+                <p>{settings.styleInstruction}</p>
+              </div>
             </div>
           )}
         </div>
