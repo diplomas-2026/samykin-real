@@ -44,6 +44,16 @@ public class AiAssistantService {
     public AiAssistantMessageResponse chat(String employeeEmail, AiAssistantMessageRequest request) {
         var employee = userService.findByEmail(employeeEmail);
         var payouts = payoutRepository.findAllDetailedByEmployeeEmail(employeeEmail);
+        String normalizedMessage = request.message().trim();
+
+        if (isGreetingOrSmallTalk(normalizedMessage)) {
+            String greetingReply = """
+                Здравствуйте. Я могу помочь с вашими выплатами: подсказать ближайшую выплату, объяснить статус, сумму, дату или комментарий.
+                """;
+            int usedTokens = estimateTokens(normalizedMessage + greetingReply);
+            var usage = aiUsageService.consume(usedTokens);
+            return new AiAssistantMessageResponse(greetingReply.trim(), List.of(), usedTokens, usage.remainingTokens());
+        }
 
         String payoutsContext = payouts.isEmpty()
             ? "У сотрудника пока нет зарегистрированных выплат."
@@ -66,6 +76,7 @@ public class AiAssistantService {
             Отвечай только по выплатам текущего сотрудника и только на русском языке.
             Не выдумывай данные, которых нет в контексте.
             Если вопрос не относится к выплатам сотрудника, вежливо сообщи, что можешь помогать только по его выплатам.
+            Если пользователь просто поздоровался, поблагодарил, попрощался или написал короткую нейтральную фразу без вопроса о выплатах, ответь коротко и вежливо, не перечисляй выплаты и верни пустой payoutCodes.
             Объясняй статусы, даты, суммы и комментарии понятным деловым языком.
             Верни строго JSON-объект такого вида:
             {
@@ -86,7 +97,7 @@ public class AiAssistantService {
             """.formatted(employee.getFullName(), employee.getEmail(), payoutsContext);
 
         String accessToken = requestAccessToken();
-        JsonNode reply = requestCompletion(accessToken, systemPrompt, contextPrompt, request.message());
+        JsonNode reply = requestCompletion(accessToken, systemPrompt, contextPrompt, normalizedMessage);
         String message = reply.path("message").asText();
         List<String> payoutCodes = extractPayoutCodes(reply.path("payoutCodes"));
         List<AiAssistantPayoutResponse> relatedPayouts = payouts.stream()
@@ -101,7 +112,7 @@ public class AiAssistantService {
             ))
             .toList();
 
-        int usedTokens = estimateTokens(systemPrompt + contextPrompt + request.message() + message);
+        int usedTokens = estimateTokens(systemPrompt + contextPrompt + normalizedMessage + message);
         var usage = aiUsageService.consume(usedTokens);
         return new AiAssistantMessageResponse(message.trim(), relatedPayouts, usedTokens, usage.remainingTokens());
     }
@@ -257,5 +268,15 @@ public class AiAssistantService {
 
     private int estimateTokens(String text) {
         return Math.max(100, text.length() / 3);
+    }
+
+    private boolean isGreetingOrSmallTalk(String message) {
+        String normalized = message.toLowerCase()
+            .replace('ё', 'е')
+            .replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}\\s]", " ")
+            .replaceAll("\\s+", " ")
+            .trim();
+
+        return normalized.matches("^(привет|здравствуйте|добрый день|доброе утро|добрый вечер|хай|салют|спасибо|благодарю|пока|до свидания|добрый)$");
     }
 }
