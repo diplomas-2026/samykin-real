@@ -23,7 +23,7 @@ export function EmployeesPage() {
         {employees.map((employee) => (
           <div key={employee.id} className="employee-card">
             <strong>{employee.fullName}</strong>
-            <span>{employee.position}</span>
+            <span className="card-meta">{employee.position}</span>
             <span>{employee.department}</span>
             <span>{employee.email}</span>
             <code>{employee.employeeCode}</code>

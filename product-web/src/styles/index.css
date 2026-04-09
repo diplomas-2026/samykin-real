@@ -122,6 +122,9 @@ textarea {
 .metric-card {
   border-radius: 24px;
   padding: 1.35rem;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
 }
 
 .auth-card {
@@ -309,6 +312,10 @@ textarea {
   padding: 1.4rem;
 }
 
+.panel > * {
+  margin: 0;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -316,9 +323,20 @@ textarea {
 
 .table th,
 .table td {
-  padding: 1rem 0.75rem;
+  padding: 1.1rem 0.9rem;
   border-bottom: 1px solid rgba(19, 34, 56, 0.08);
   text-align: left;
+  vertical-align: middle;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0.2rem;
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: 0.2rem;
 }
 
 .status-badge,
@@ -328,6 +346,7 @@ textarea {
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .status-created { background: rgba(19, 56, 190, 0.12); }
@@ -346,11 +365,66 @@ textarea {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  align-items: flex-start;
+  padding: 0.35rem 0;
 }
 
 .usage-list span,
 .detail-row span {
   color: #5b6b79;
+}
+
+.feature-card > *,
+.employee-card > *,
+.metric-card > * {
+  margin: 0;
+}
+
+.employee-card strong,
+.feature-card strong {
+  line-height: 1.3;
+}
+
+.employee-card p,
+.feature-card p {
+  color: #4b5a68;
+  line-height: 1.55;
+}
+
+.employee-card code {
+  width: fit-content;
+  padding: 0.3rem 0.55rem;
+  border-radius: 12px;
+  background: rgba(19, 34, 56, 0.06);
+  color: #304256;
+}
+
+.payout-card {
+  gap: 0.9rem;
+}
+
+.card-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.card-title-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.card-amount {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #22344c;
+}
+
+.card-meta {
+  color: #5a6978;
 }
 
 .form-grid {
@@ -404,5 +478,10 @@ textarea {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-topline {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

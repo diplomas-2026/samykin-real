@@ -22,11 +22,15 @@ export function MyPayoutsPage() {
       />
       <div className="card-grid">
         {payouts.map((payout) => (
-          <div key={payout.id} className="employee-card">
-            <strong>{payout.payoutType}</strong>
-            <span>{formatCurrency(payout.amount)}</span>
-            <span>{formatDate(payout.payoutDate)}</span>
-            <span className={`status-badge status-${payout.status.toLowerCase()}`}>{statusLabels[payout.status]}</span>
+          <div key={payout.id} className="employee-card payout-card">
+            <div className="card-topline">
+              <div className="card-title-group">
+                <strong>{payout.payoutType}</strong>
+                <span className="card-amount">{formatCurrency(payout.amount)}</span>
+              </div>
+              <span className={`status-badge status-${payout.status.toLowerCase()}`}>{statusLabels[payout.status]}</span>
+            </div>
+            <span className="card-meta">{formatDate(payout.payoutDate)}</span>
             <p>{payout.comment}</p>
           </div>
         ))}
