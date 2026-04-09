@@ -5,21 +5,56 @@ import { aiApi } from '../api/services';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
+import { useAuth } from '../hooks/useAuth';
 import { getApiErrorMessage } from '../utils/api';
 import { formatCurrency, formatDate, formatDateTime, statusLabels } from '../utils/formatters';
 
+const DEFAULT_ASSISTANT_MESSAGE = {
+  role: 'assistant',
+  content: 'Здравствуйте. Я могу ответить на вопросы только по вашим выплатам: по суммам, датам, статусам и комментариям.',
+  payouts: [],
+};
+
 export function AssistantPage() {
+  const { user } = useAuth();
   const [usage, setUsage] = useState(null);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'Здравствуйте. Я могу ответить на вопросы только по вашим выплатам: по суммам, датам, статусам и комментариям.',
-      payouts: [],
-    },
-  ]);
+  const [messages, setMessages] = useState([DEFAULT_ASSISTANT_MESSAGE]);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const storageKey = useMemo(() => (user?.id ? `assistant-history:${user.id}` : null), [user?.id]);
+
+  useEffect(() => {
+    if (!storageKey) {
+      return;
+    }
+
+    try {
+      const rawHistory = localStorage.getItem(storageKey);
+      if (!rawHistory) {
+        setMessages([DEFAULT_ASSISTANT_MESSAGE]);
+        return;
+      }
+
+      const parsedHistory = JSON.parse(rawHistory);
+      if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+        setMessages(parsedHistory);
+        return;
+      }
+    } catch {
+      // Ignore malformed local history and restore a clean default state.
+    }
+
+    setMessages([DEFAULT_ASSISTANT_MESSAGE]);
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (!storageKey || messages.length === 0) {
+      return;
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(messages));
+  }, [messages, storageKey]);
 
   useEffect(() => {
     aiApi.getUsage()
