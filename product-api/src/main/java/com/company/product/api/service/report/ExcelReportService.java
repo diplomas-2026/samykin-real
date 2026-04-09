@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class ExcelReportService {
     private final PayoutRepository payoutRepository;
     private final UserAccountRepository userAccountRepository;
 
+    @Transactional(readOnly = true)
     public byte[] buildPayoutsPeriodReport(LocalDate from, LocalDate to) {
         return withWorkbook("Выплаты за период", sheet -> {
             Row header = sheet.createRow(0);
@@ -41,6 +43,7 @@ public class ExcelReportService {
         });
     }
 
+    @Transactional(readOnly = true)
     public byte[] buildStatusReport() {
         return withWorkbook("Выданные и невыданные", sheet -> {
             Row header = sheet.createRow(0);
@@ -53,6 +56,7 @@ public class ExcelReportService {
         });
     }
 
+    @Transactional(readOnly = true)
     public byte[] buildEmployeesReport() {
         return withWorkbook("Сотрудники", sheet -> {
             Row header = sheet.createRow(0);
@@ -74,6 +78,7 @@ public class ExcelReportService {
         });
     }
 
+    @Transactional(readOnly = true)
     public byte[] buildSummaryReport() {
         return withWorkbook("Сводка", sheet -> {
             Row header = sheet.createRow(0);
