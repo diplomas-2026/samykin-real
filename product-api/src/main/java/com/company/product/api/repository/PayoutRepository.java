@@ -43,5 +43,12 @@ public interface PayoutRepository extends JpaRepository<Payout, Long> {
 
     List<Payout> findAllByStatusOrderByCreatedAtDesc(PayoutStatus status);
 
-    List<Payout> findAllByPayoutDateBetweenOrderByPayoutDateAsc(LocalDate from, LocalDate to);
+    @Query("""
+        select p from Payout p
+        join fetch p.employee e
+        join fetch p.createdBy cb
+        where p.payoutDate between :from and :to
+        order by p.payoutDate asc
+        """)
+    List<Payout> findAllByPayoutDateBetweenOrderByPayoutDateAsc(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }
