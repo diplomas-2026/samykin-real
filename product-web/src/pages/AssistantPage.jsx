@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { aiApi } from '../api/services';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { Loader } from '../components/ui/Loader';
 import { PageHeader } from '../components/ui/PageHeader';
 import { getApiErrorMessage } from '../utils/api';
-import { formatDateTime } from '../utils/formatters';
+import { formatCurrency, formatDate, formatDateTime, statusLabels } from '../utils/formatters';
 
 export function AssistantPage() {
   const [usage, setUsage] = useState(null);
@@ -12,6 +14,7 @@ export function AssistantPage() {
     {
       role: 'assistant',
       content: 'Здравствуйте. Я могу ответить на вопросы только по вашим выплатам: по суммам, датам, статусам и комментариям.',
+      payouts: [],
     },
   ]);
   const [draft, setDraft] = useState('');
@@ -49,13 +52,9 @@ export function AssistantPage() {
     try {
       const result = await aiApi.chat({
         message: trimmed,
-        history: messages
-          .filter((message) => message.role === 'user' || message.role === 'assistant')
-          .slice(-8)
-          .map((message) => ({ role: message.role, content: message.content })),
       });
 
-      setMessages((current) => [...current, { role: 'assistant', content: result.reply }]);
+      setMessages((current) => [...current, { role: 'assistant', content: result.message, payouts: result.payouts || [] }]);
       setUsage((current) => current ? { ...current, usedTokens: current.usedTokens + result.usedTokens, remainingTokens: result.remainingTokens } : current);
     } catch (requestError) {
       setMessages((current) => current.filter((message, index) => !(index === current.length - 1 && message.role === 'user' && message.content === trimmed)));
@@ -118,7 +117,28 @@ export function AssistantPage() {
           {messages.map((message, index) => (
             <div key={`${message.role}-${index}`} className={`assistant-message assistant-message--${message.role}`}>
               <span className="assistant-message__role">{message.role === 'assistant' ? 'AI-помощник' : 'Вы'}</span>
-              <p>{message.content}</p>
+              {message.role === 'assistant' ? (
+                <div className="assistant-markdown">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                </div>
+              ) : (
+                <p>{message.content}</p>
+              )}
+              {message.role === 'assistant' && message.payouts?.length > 0 ? (
+                <div className="assistant-payouts">
+                  {message.payouts.map((payout) => (
+                    <Link key={payout.id} to={`/payouts/${payout.id}`} className="assistant-payout-card">
+                      <div className="assistant-payout-card__top">
+                        <strong>{payout.payoutCode}</strong>
+                        <span className={`status-badge status-${payout.status.toLowerCase()}`}>{statusLabels[payout.status]}</span>
+                      </div>
+                      <span>{payout.payoutType}</span>
+                      <span>{formatCurrency(payout.amount)}</span>
+                      <span>{formatDate(payout.payoutDate)}</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
             </div>
           ))}
           {loading ? (

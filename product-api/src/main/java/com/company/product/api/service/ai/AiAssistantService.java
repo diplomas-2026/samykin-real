@@ -2,7 +2,7 @@ package com.company.product.api.service.ai;
 
 import com.company.product.api.dto.ai.AiAssistantMessageRequest;
 import com.company.product.api.dto.ai.AiAssistantMessageResponse;
-import com.company.product.api.dto.ai.AiChatTurnRequest;
+import com.company.product.api.dto.ai.AiAssistantPayoutResponse;
 import com.company.product.api.repository.PayoutRepository;
 import com.company.product.api.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,6 +66,14 @@ public class AiAssistantService {
             Не выдумывай данные, которых нет в контексте.
             Если вопрос не относится к выплатам сотрудника, вежливо сообщи, что можешь помогать только по его выплатам.
             Объясняй статусы, даты, суммы и комментарии понятным деловым языком.
+            Верни строго JSON-объект такого вида:
+            {
+              "message": "ответ в markdown",
+              "payoutCodes": ["PAY-00001", "PAY-00002"]
+            }
+            В message можно использовать markdown.
+            В payoutCodes укажи только те коды выплат, которые реально относятся к ответу.
+            Если релевантных выплат нет, верни пустой массив.
             """;
 
         String contextPrompt = """
@@ -76,10 +84,24 @@ public class AiAssistantService {
             """.formatted(employee.getFullName(), employee.getEmail(), payoutsContext);
 
         String accessToken = requestAccessToken();
-        String reply = requestCompletion(accessToken, systemPrompt, contextPrompt, request.history(), request.message());
-        int usedTokens = estimateTokens(systemPrompt + contextPrompt + request.message() + reply);
+        JsonNode reply = requestCompletion(accessToken, systemPrompt, contextPrompt, request.message());
+        String message = reply.path("message").asText();
+        List<String> payoutCodes = extractPayoutCodes(reply.path("payoutCodes"));
+        List<AiAssistantPayoutResponse> relatedPayouts = payouts.stream()
+            .filter(payout -> payoutCodes.contains(payout.getPayoutCode()))
+            .map(payout -> new AiAssistantPayoutResponse(
+                payout.getId(),
+                payout.getPayoutCode(),
+                payout.getPayoutType(),
+                payout.getAmount(),
+                payout.getPayoutDate(),
+                payout.getStatus()
+            ))
+            .toList();
+
+        int usedTokens = estimateTokens(systemPrompt + contextPrompt + request.message() + message);
         var usage = aiUsageService.consume(usedTokens);
-        return new AiAssistantMessageResponse(reply.trim(), usedTokens, usage.remainingTokens());
+        return new AiAssistantMessageResponse(message.trim(), relatedPayouts, usedTokens, usage.remainingTokens());
     }
 
     private String requestAccessToken() {
@@ -107,7 +129,7 @@ public class AiAssistantService {
         return response.path("access_token").asText();
     }
 
-    private String requestCompletion(String accessToken, String systemPrompt, String contextPrompt, List<AiChatTurnRequest> history, String message) {
+    private JsonNode requestCompletion(String accessToken, String systemPrompt, String contextPrompt, String message) {
         try {
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("model", "GigaChat");
@@ -119,14 +141,6 @@ public class AiAssistantService {
                 .add(objectMapper.createObjectNode()
                     .put("role", "user")
                     .put("content", contextPrompt));
-
-            if (history != null) {
-                history.stream()
-                    .limit(10)
-                    .forEach(turn -> messages.add(objectMapper.createObjectNode()
-                        .put("role", turn.role())
-                        .put("content", turn.content())));
-            }
 
             messages.add(objectMapper.createObjectNode()
                 .put("role", "user")
@@ -148,10 +162,36 @@ public class AiAssistantService {
             if (!StringUtils.hasText(content)) {
                 throw new IllegalStateException("GigaChat вернул пустой ответ");
             }
-            return content;
+            JsonNode parsed = objectMapper.readTree(normalizeJsonContent(content));
+            if (!StringUtils.hasText(parsed.path("message").asText())) {
+                throw new IllegalStateException("GigaChat вернул пустой message");
+            }
+            return parsed;
         } catch (Exception exception) {
             throw new IllegalStateException("Не удалось получить ответ от GigaChat: " + exception.getMessage(), exception);
         }
+    }
+
+    private String normalizeJsonContent(String content) {
+        String normalized = content.trim();
+        if (normalized.startsWith("```")) {
+            normalized = normalized
+                .replaceFirst("^```json\\s*", "")
+                .replaceFirst("^```\\s*", "")
+                .replaceFirst("\\s*```$", "");
+        }
+        return normalized.trim();
+    }
+
+    private List<String> extractPayoutCodes(JsonNode payoutCodesNode) {
+        if (payoutCodesNode == null || !payoutCodesNode.isArray()) {
+            return List.of();
+        }
+        return java.util.stream.StreamSupport.stream(payoutCodesNode.spliterator(), false)
+            .map(JsonNode::asText)
+            .filter(StringUtils::hasText)
+            .distinct()
+            .toList();
     }
 
     private int estimateTokens(String text) {
