@@ -48,12 +48,13 @@ public class PayoutService {
         payout.setStatus(PayoutStatus.CREATED);
         applyEditableFields(payout, request);
         Payout saved = payoutRepository.save(payout);
-        auditService.log(actorEmail, "CREATE_PAYOUT", "Создана выплата " + saved.getPayoutCode());
+        auditService.log(actor, "CREATE_PAYOUT", "Создана выплата " + saved.getPayoutCode(), saved);
         return payoutMapper.toResponse(saved);
     }
 
     @Transactional
     public PayoutResponse update(Long id, PayoutRequest request, String actorEmail) {
+        var actor = userService.findByEmail(actorEmail);
         Payout payout = getEntity(id);
         if (payout.getStatus() == PayoutStatus.PAID) {
             throw new IllegalArgumentException("Выданную выплату нельзя редактировать");
@@ -61,12 +62,13 @@ public class PayoutService {
         payout.setEmployee(userService.getEntity(request.employeeId()));
         applyEditableFields(payout, request);
         Payout saved = payoutRepository.save(payout);
-        auditService.log(actorEmail, "UPDATE_PAYOUT", "Обновлена выплата " + saved.getPayoutCode());
+        auditService.log(actor, "UPDATE_PAYOUT", "Обновлена выплата " + saved.getPayoutCode(), saved);
         return payoutMapper.toResponse(saved);
     }
 
     @Transactional
     public PayoutResponse updateStatus(Long id, PayoutStatus status, String actorEmail) {
+        var actor = userService.findByEmail(actorEmail);
         Payout payout = getEntity(id);
         validateTransition(payout.getStatus(), status);
         payout.setStatus(status);
@@ -77,7 +79,7 @@ public class PayoutService {
             payout.setPaidAt(OffsetDateTime.now());
         }
         Payout saved = payoutRepository.save(payout);
-        auditService.log(actorEmail, "UPDATE_PAYOUT_STATUS", "Статус " + saved.getPayoutCode() + " -> " + status);
+        auditService.log(actor, "UPDATE_PAYOUT_STATUS", "Статус " + saved.getPayoutCode() + " -> " + status, saved);
         return payoutMapper.toResponse(saved);
     }
 
